@@ -4,7 +4,6 @@ namespace App\Entity;
 
 use App\Repository\WordRepository;
 use Doctrine\ORM\Mapping as ORM;
-use phpDocumentor\Reflection\Types\Boolean;
 
 #[ORM\Entity(repositoryClass: WordRepository::class)]
 class Word
@@ -12,8 +11,6 @@ class Word
 
     #[ORM\Column(type: 'string', length: 255)]
     private $string;
-
-    private $stringArray;
 
     #[ORM\Column(type: 'integer')]
     private $score;
@@ -47,12 +44,6 @@ class Word
         $this->score = $score;
 
         return $this;
-    }
-
-    private function setStringArray(): void
-    {
-        // Make an array out of the existing string.
-        $this->stringArray = str_split($this->string);
     }
 
     private function increaseScore($newPoints)
@@ -96,8 +87,6 @@ class Word
         // API validation passed.
         if($validationResult)
         {
-            // Make an array out of the string, used in later validation.
-            $this->setStringArray();
             // Validation passed.
             return true;
 
@@ -108,8 +97,10 @@ class Word
 
     private function scoreWordBasedOnUniqueCharacters(): void
     {
+        // Make an array out of the existing string.
+        $stringArray = str_split($this->string);
         // Filter array in order to get rid of duplicate members.
-        $uniqueArrayKeys = array_unique($this->stringArray);
+        $uniqueArrayKeys = array_unique($stringArray);
         // Return count of the remaining array members.
         $this->increaseScore(count($uniqueArrayKeys));
     }
@@ -159,7 +150,7 @@ class Word
                         return true;
                     }
                 }
-                // Word is not a palindrome.
+                // Word is not a almost a palindrome.
                 return false;
             }
         }
