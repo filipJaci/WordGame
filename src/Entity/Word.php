@@ -9,15 +9,22 @@ use Doctrine\ORM\Mapping as ORM;
 class Word
 {
 
+    // Original string that was passed.
     #[ORM\Column(type: 'string', length: 255)]
     private $string;
 
+    // String used for further validation.
+    private $cleanString;
+
+    // Score.
     #[ORM\Column(type: 'integer')]
     private $score;
 
     function __construct($string) {
         // Set string.
         $this->setString($string);
+        // Set clean string.
+        $this->setCleanString($string);
         // Set score.
         $this->setScore(0);
     }
@@ -46,6 +53,12 @@ class Word
         return $this;
     }
 
+    private function setCleanString($string): void
+    {
+        // Removes whitespaces and converts string to lowercase.
+        $this->cleanString = trim(strtolower($string));
+    }
+
     private function increaseScore($newPoints)
     {
         // Add new points to the exsisting score.
@@ -60,7 +73,7 @@ class Word
             // Score a Word based on unique characters.
             $this->scoreWordBasedOnUniqueCharacters();
             // Word is a palindrome.
-            if($this->checkPalindrome($this->string))
+            if($this->checkPalindrome($this->cleanString))
             {
                 // Increase score by 3.
                 $this->increaseScore(3);
@@ -98,7 +111,7 @@ class Word
     private function scoreWordBasedOnUniqueCharacters(): void
     {
         // Make an array out of the existing string.
-        $stringArray = str_split($this->string);
+        $stringArray = str_split($this->cleanString);
         // Filter array in order to get rid of duplicate members.
         $uniqueArrayKeys = array_unique($stringArray);
         // Return count of the remaining array members.
@@ -123,15 +136,15 @@ class Word
     public function checkAlmostAPalindrome()
     {
         // Reverse the string.
-        $reverseString = strrev($this->string);
+        $reverseString = strrev($this->cleanString);
         // Itterate through the string.
-        for($i = 0; $i < strlen($this->string); $i++)
+        for($i = 0; $i < strlen($this->cleanString); $i++)
         {
             // Characters between the two strings don't match, at least one of the two causes a problem.
-            if($this->string[$i] !== $reverseString[$i])
+            if($this->cleanString[$i] !== $reverseString[$i])
             {
                 // Remove problematic character from the first string.
-                $shortenedString = substr_replace($this->string, '', $i, 1);                
+                $shortenedString = substr_replace($this->cleanString, '', $i, 1);                
                 // Word is now a palindrome.
                 if($this->checkPalindrome($shortenedString))
                 {

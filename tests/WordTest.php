@@ -60,4 +60,32 @@ class WordTest extends TestCase
         // Score is 6, 4 for the unique letters and 2 for being almost a palindrome.
         $this->assertEquals(6, $score);
     }
+
+    /** @test */
+    public function word_validation_is_not_case_sensitive()
+    {
+        // Set a 6 letter Word with mixed cases that's almost a palindrome.
+        $string = 'EnGaGe';
+        // Create a new Word object.
+        $word = new Word($string);
+        // Run score method.
+        $score = $word->calculateScore();
+        // Word got validated properly even though it's in mixed case.
+        // Score is 6, 4 for the unique letters and 2 for being almost a palindrome.
+        $this->assertEquals(6, $score);
+    }
+
+    /** @test */
+    public function word_validation_works_with_whitespaces()
+    {
+        // Set a 6 letter Word with whitespaces that's almost a palindrome.
+        $string = 'engage  ';
+        // Create a new Word object.
+        $word = new Word($string);
+        // Run score method.
+        $score = $word->calculateScore();
+        // Word got validated properly even though it had whitespaces.
+        // Score is 6, 4 for the unique letters and 2 for being almost a palindrome.
+        $this->assertEquals(6, $score);
+    }
 }
