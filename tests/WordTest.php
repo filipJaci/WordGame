@@ -20,6 +20,12 @@ class WordTest extends TestCase
         $score = $word->calculateScore();
         // Score is 5.
         $this->assertEquals(5, $score);
+        // Get scenarios.
+        $scenarios = $word->getScenarios();
+        // There is 1 scenario that got triggered.
+        $this->assertEquals(1, count($scenarios));
+        // Scenario unique got triggered.
+        $this->assertTrue(array_key_exists('unique', $scenarios));
     }
 
     /** @test */
@@ -33,6 +39,12 @@ class WordTest extends TestCase
         $score = $word->calculateScore();
         // Score is 4.
         $this->assertEquals(4, $score);
+        // Get scenarios.
+        $scenarios = $word->getScenarios();
+        // There is 1 scenario that got triggered.
+        $this->assertEquals(1, count($scenarios));
+        // Scenario unique got triggered.
+        $this->assertTrue(array_key_exists('unique', $scenarios));
     }
 
     /** @test */
@@ -46,6 +58,18 @@ class WordTest extends TestCase
         $score = $word->calculateScore();
         // Score is 7, 4 for the unique characters and 3 for being a palindrome.
         $this->assertEquals(7, $score);
+        // Get scenarios.
+        $scenarios = $word->getScenarios();
+        // There are 2 scenarios that got triggered.
+        $this->assertEquals(2, count($scenarios));
+        // Scenario unique got triggered.
+        $this->assertTrue(array_key_exists('unique', $scenarios));
+        // Scenario palindrome got triggered.
+        $this->assertTrue(array_key_exists('palindrome', $scenarios));
+        // Scenario unique scored 4 points.
+        $this->assertEquals(4, $scenarios['unique']);
+        // Scenario palindrome scored 3 points.
+        $this->assertEquals(3, $scenarios['palindrome']);
     }
 
     /** @test */
@@ -59,6 +83,18 @@ class WordTest extends TestCase
         $score = $word->calculateScore();
         // Score is 6, 4 for the unique characters and 2 for being almost a palindrome.
         $this->assertEquals(6, $score);
+        // Get scenarios.
+        $scenarios = $word->getScenarios();
+        // There are 2 scenarios that got triggered.
+        $this->assertEquals(2, count($scenarios));
+        // Scenario unique got triggered.
+        $this->assertTrue(array_key_exists('unique', $scenarios));
+        // Scenario almost-palindrome got triggered.
+        $this->assertTrue(array_key_exists('almost-palindrome', $scenarios));
+        // Scenario unique scored 4 points.
+        $this->assertEquals(4, $scenarios['unique']);
+        // Scenario almost-palindrome scored 3 points.
+        $this->assertEquals(2, $scenarios['almost-palindrome']);
     }
 
     /** @test */
@@ -73,6 +109,18 @@ class WordTest extends TestCase
         // Word got validated properly even though it's in mixed case.
         // Score is 6, 4 for the unique characters and 2 for being almost a palindrome.
         $this->assertEquals(6, $score);
+        // Get scenarios.
+        $scenarios = $word->getScenarios();
+        // There are 2 scenarios that got triggered.
+        $this->assertEquals(2, count($scenarios));
+        // Scenario unique got triggered.
+        $this->assertTrue(array_key_exists('unique', $scenarios));
+        // Scenario almost-palindrome got triggered.
+        $this->assertTrue(array_key_exists('almost-palindrome', $scenarios));
+        // Scenario unique scored 4 points.
+        $this->assertEquals(4, $scenarios['unique']);
+        // Scenario almost-palindrome scored 3 points.
+        $this->assertEquals(2, $scenarios['almost-palindrome']);
     }
 
     /** @test */
@@ -87,6 +135,18 @@ class WordTest extends TestCase
         // Word got validated properly even though it had whitespaces.
         // Score is 6, 4 for the unique characters and 2 for being almost a palindrome.
         $this->assertEquals(6, $score);
+        // Get scenarios.
+        $scenarios = $word->getScenarios();
+        // There are 2 scenarios that got triggered.
+        $this->assertEquals(2, count($scenarios));
+        // Scenario unique got triggered.
+        $this->assertTrue(array_key_exists('unique', $scenarios));
+        // Scenario almost-palindrome got triggered.
+        $this->assertTrue(array_key_exists('almost-palindrome', $scenarios));
+        // Scenario unique scored 4 points.
+        $this->assertEquals(4, $scenarios['unique']);
+        // Scenario almost-palindrome scored 3 points.
+        $this->assertEquals(2, $scenarios['almost-palindrome']);
     }
 
     /** @test */
@@ -101,6 +161,18 @@ class WordTest extends TestCase
         // Word got validated properly even though it had whitespaces.
         // Score is 5, 3 for the unique characters and 2 for being almost a palindrome.
         $this->assertEquals(5, $score);
+        // Get scenarios.
+        $scenarios = $word->getScenarios();
+        // There are 2 scenarios that got triggered.
+        $this->assertEquals(2, count($scenarios));
+        // Scenario unique got triggered.
+        $this->assertTrue(array_key_exists('unique', $scenarios));
+        // Scenario almost-palindrome got triggered.
+        $this->assertTrue(array_key_exists('almost-palindrome', $scenarios));
+        // Scenario unique scored 4 points.
+        $this->assertEquals(3, $scenarios['unique']);
+        // Scenario almost-palindrome scored 3 points.
+        $this->assertEquals(2, $scenarios['almost-palindrome']);
     }
 
     /** @test */
@@ -115,6 +187,12 @@ class WordTest extends TestCase
         // Word got validated properly even though it had whitespaces.
         // Score is 3, for the 3 unique characters.
         $this->assertEquals(3, $score);
+        // Get scenarios.
+        $scenarios = $word->getScenarios();
+        // There was 1 scenario that got triggered.
+        $this->assertEquals(1, count($scenarios));
+        // Scenario unique got triggered.
+        $this->assertTrue(array_key_exists('unique', $scenarios));
     }
 
     /** @test */
@@ -129,6 +207,12 @@ class WordTest extends TestCase
         // Word got validated properly even though it had whitespaces.
         // Score is 3, for the 3 unique characters.
         $this->assertEquals(3, $score);
+        // Get scenarios.
+        $scenarios = $word->getScenarios();
+        // There was 1 scenario that got triggered.
+        $this->assertEquals(1, count($scenarios));
+        // Scenario unique got triggered.
+        $this->assertTrue(array_key_exists('unique', $scenarios));
     }
 
     /** @test */
@@ -143,6 +227,12 @@ class WordTest extends TestCase
         // Word got validated properly even though it had whitespaces.
         // Score is 4, for the 4 unique characters.
         $this->assertEquals(4, $score);
+        // Get scenarios.
+        $scenarios = $word->getScenarios();
+        // There was 1 scenario that got triggered.
+        $this->assertEquals(1, count($scenarios));
+        // Scenario unique got triggered.
+        $this->assertTrue(array_key_exists('unique', $scenarios));
     }
 
     /** @test */
@@ -156,6 +246,12 @@ class WordTest extends TestCase
         $score = $word->calculateScore();
         // Score is 0, since validation didn't pass.
         $this->assertEquals(0, $score);
+        // Get scenarios.
+        $scenarios = $word->getScenarios();
+        // There was 1 scenario that got triggered.
+        $this->assertEquals(1, count($scenarios));
+        // Scenario failed.string got triggered.
+        $this->assertTrue(array_key_exists('failed.string', $scenarios));
     }
 
     /** @test */

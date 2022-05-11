@@ -36,7 +36,7 @@ class Word
     private array $messages;
 
     // Stores less precise API responses.
-    private array $scenarios;
+    private array $scenarios = [];
 
     public function __construct(string $string = '')
     {
@@ -76,13 +76,13 @@ class Word
         $this->score = $score;
     }
 
-    private function setCleanString($string): void
+    private function setCleanString(string $string): void
     {
         // Removes whitespaces and converts string to lowercase.
         $this->cleanString = trim(strtolower($string));
     }
 
-    private function increaseScore($newPoints)
+    private function increaseScore(int $newPoints)
     {
         // Add new points to the exsisting score.
         $this->score+=$newPoints;
@@ -91,6 +91,17 @@ class Word
     private function getPoints(string $scenario): int
     {
         return self::$scoreSystem[$scenario];
+    }
+
+    private function addScenario(string $scenario, int $points): void
+    {
+        // Add to the scenario array.
+        $this->scenarios+=[$scenario => $points];
+    }
+
+    public function getScenarios(): array
+    {
+        return $this->scenarios;
     }
 
     public function calculateScore()
@@ -108,6 +119,8 @@ class Word
                 {
                     // Increase score for being a palindrome.
                     $this->increaseScore($this->getPoints('palindrome'));
+                    // Add scenario.
+                    $this->addScenario('palindrome', $this->getPoints('palindrome'));
                 }
                 // Word is not a palindrome.
                 else
@@ -117,6 +130,8 @@ class Word
                     {
                         // Increase score for being almost a palindrome.
                         $this->increaseScore($this->getPoints('almost-palindrome'));
+                        // Add scenario.
+                        $this->addScenario('almost-palindrome', $this->getPoints('almost-palindrome'));
                     }
                 }
                 // return score.
@@ -141,23 +156,37 @@ class Word
         return false;
     }
 
-    private function validateCleanString($string): bool
+    private function validateCleanString(string $string): bool
     {
         // Performs regex check on the string.
-        return preg_match($this->wordRegex, $string);
+        $passed = preg_match($this->wordRegex, $string);
+        // Clean string validation didn't pass.
+        if(! $passed)
+        {
+            // Add a scenario.
+            $this->addScenario('failed.string', 0);
+            // Clean string validation didn't pass.
+            return false;
+        }
+        // Clean string validation passed.
+        return true;
     }
 
     private function scoreWordBasedOnUniqueCharacters(): void
     {
         // Make an array out of the existing string.
         $stringArray = str_split($this->cleanString);
-        // Filter array in order to get rid of duplicate members.
-        $uniqueArrayKeys = array_unique($stringArray);
-        // Return multiplication of all of the unique characters and points per unique character.
-        $this->increaseScore(count($uniqueArrayKeys) * $this->getPoints('unique'));
+        // Filter array in order to get rid of duplicate members, then count the remaning members.
+        $uniqueCharacters = count(array_unique($stringArray));
+        // Score to be added, certain number of points for each character.
+        $newPoints = $uniqueCharacters * $this->getPoints('unique');
+        // Increase the score.
+        $this->increaseScore($newPoints);
+        // Add scenario.
+        $this->addScenario('unique', $newPoints);
     }
 
-    private function checkPalindrome($string): bool
+    private function checkPalindrome(string $string): bool
     {
         // Reverse the string.
         $reverseString = strrev($string);
@@ -172,7 +201,7 @@ class Word
         return false;
     }
 
-    public function checkAlmostAPalindrome()
+    public function checkAlmostAPalindrome(): bool
     {
         // Reverse the string.
         $reverseString = strrev($this->cleanString);
