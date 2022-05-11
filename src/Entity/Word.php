@@ -33,7 +33,7 @@ class Word
     ];
 
     // Stores more precise API responses.
-    private array $messages;
+    private array $messages = [];
 
     // Stores less precise API responses.
     private array $scenarios = [];
@@ -49,6 +49,8 @@ class Word
             $this->setCleanString($string);
             // Sets score.
             $this->setScore(0);
+            // Run the calculate score method.
+            $this->calculateScore();
         }
     }
 
@@ -64,7 +66,7 @@ class Word
         $this->string = $string;
     }
 
-    private function getScore(): ?int
+    public function getScore(): ?int
     {
         // Gets score.
         return $this->score;
@@ -104,7 +106,37 @@ class Word
         return $this->scenarios;
     }
 
-    public function calculateScore()
+    private function addUniqueCharactersMessage(int $points): void
+    {
+        $this->messages['unique'] = $points . ', based on unique characters.';
+    }
+
+    private function addPalindromeMessage(int $points): void
+    {
+        $this->messages['palindrome'] = $points . ', based on the word being a palendrome.';
+    }
+
+    private function addAlmostAPalindromeMessage(int $points): void
+    {
+        $this->messages['almost-palindrome'] = $points . ', based on the word being almost a palendrome.';
+    }
+
+    private function addTotalScoreMessage(int $points): void
+    {
+        $this->messages['total'] = 'Congratulations, you\'ve scored ' . $points . ' points, based on:';
+    }
+
+    private function addFailedCleanStringValidation(string $character): void
+    {
+        $this->messages['failed.string'] = 'There was an error, string contains forbidden character: ' . $character;
+    }
+
+    public function getMessages(): array
+    {
+        return $this->messages;
+    }
+
+    private function calculateScore()
     {
         // Word doesn't contain any of the forbidden symbols.
         if($this->validateCleanString($this->cleanString))
@@ -121,6 +153,8 @@ class Word
                     $this->increaseScore($this->getPoints('palindrome'));
                     // Add scenario.
                     $this->addScenario('palindrome', $this->getPoints('palindrome'));
+                    // Add message.
+                    $this->addPalindromeMessage($this->getPoints('palindrome'));
                 }
                 // Word is not a palindrome.
                 else
@@ -132,10 +166,14 @@ class Word
                         $this->increaseScore($this->getPoints('almost-palindrome'));
                         // Add scenario.
                         $this->addScenario('almost-palindrome', $this->getPoints('almost-palindrome'));
+                        // Add message.
+                        $this->addAlmostAPalindromeMessage($this->getPoints('almost-palindrome'));
                     }
                 }
-                // return score.
-                return $this->getScore();
+                // Add total score message.
+                $this->addTotalScoreMessage($this->score);
+                // Return object.
+                return $this;
             }
         }
 
@@ -165,6 +203,10 @@ class Word
         {
             // Add a scenario.
             $this->addScenario('failed.string', 0);
+            // Get forbidden characters.
+            $forbiddenCharacters = preg_replace('/[a-zA-Z0-9!&-]/', '', $string);
+            // Add message.
+            $this->addFailedCleanStringValidation($forbiddenCharacters);
             // Clean string validation didn't pass.
             return false;
         }
@@ -184,6 +226,8 @@ class Word
         $this->increaseScore($newPoints);
         // Add scenario.
         $this->addScenario('unique', $newPoints);
+        // Add message.
+        $this->addUniqueCharactersMessage($newPoints);
     }
 
     private function checkPalindrome(string $string): bool
