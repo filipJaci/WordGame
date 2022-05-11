@@ -13,14 +13,30 @@ class Word
     #[ORM\Column(type: 'string', length: 255)]
     private $string;
 
-    // String used for further validation.
-    private string $cleanString;
-
-    private string $wordRegex = '/^[a-zA-Z0-9!&-]*$/';
-
     // Score.
     #[ORM\Column(type: 'integer')]
     private $score;
+
+    // String used for further validation.
+    private string $cleanString;
+
+    // Regex used for the clean string validation.
+    private string $wordRegex = '/^[a-zA-Z0-9!&-]*$/';
+
+    private static array $scoreSystem = [
+        // Score per unique character.
+        'unique' => 1,
+        // Bonus for the Word being an palindrome.
+        'palindrome' => 3,
+        // Bonus for the Word being almost an palindrome.
+        'almost-palindrome' => 2
+    ];
+
+    // Stores more precise API responses.
+    private array $messages;
+
+    // Stores less precise API responses.
+    private array $scenarios;
 
     public function __construct(string $string = '')
     {
@@ -38,6 +54,7 @@ class Word
 
     private function getString(): ?string
     {
+        // Gets string.
         return $this->string;
     }
 
@@ -49,14 +66,14 @@ class Word
 
     private function getScore(): ?int
     {
+        // Gets score.
         return $this->score;
     }
 
-    private function setScore(int $score): self
+    private function setScore(int $score): void
     {
+        // Sets score.
         $this->score = $score;
-
-        return $this;
     }
 
     private function setCleanString($string): void
@@ -69,6 +86,11 @@ class Word
     {
         // Add new points to the exsisting score.
         $this->score+=$newPoints;
+    }
+
+    private function getPoints(string $scenario): int
+    {
+        return self::$scoreSystem[$scenario];
     }
 
     public function calculateScore()
@@ -84,8 +106,8 @@ class Word
                 // Word is a palindrome.
                 if($this->checkPalindrome($this->cleanString))
                 {
-                    // Increase score by 3.
-                    $this->increaseScore(3);
+                    // Increase score for being a palindrome.
+                    $this->increaseScore($this->getPoints('palindrome'));
                 }
                 // Word is not a palindrome.
                 else
@@ -93,8 +115,8 @@ class Word
                     // Word is almost a palindrome.
                     if($this->checkAlmostAPalindrome())
                     {
-                        // Increase score by 2.
-                        $this->increaseScore(2);
+                        // Increase score for being almost a palindrome.
+                        $this->increaseScore($this->getPoints('almost-palindrome'));
                     }
                 }
                 // return score.
@@ -131,8 +153,8 @@ class Word
         $stringArray = str_split($this->cleanString);
         // Filter array in order to get rid of duplicate members.
         $uniqueArrayKeys = array_unique($stringArray);
-        // Return count of the remaining array members.
-        $this->increaseScore(count($uniqueArrayKeys));
+        // Return multiplication of all of the unique characters and points per unique character.
+        $this->increaseScore(count($uniqueArrayKeys) * $this->getPoints('unique'));
     }
 
     private function checkPalindrome($string): bool
