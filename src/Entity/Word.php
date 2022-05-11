@@ -14,19 +14,26 @@ class Word
     private $string;
 
     // String used for further validation.
-    private $cleanString;
+    private string $cleanString;
+
+    private string $wordRegex = '/^[a-zA-Z0-9!&-]*$/';
 
     // Score.
     #[ORM\Column(type: 'integer')]
     private $score;
 
-    function __construct($string) {
-        // Set string.
-        $this->setString($string);
-        // Set clean string.
-        $this->setCleanString($string);
-        // Set score.
-        $this->setScore(0);
+    public function __construct(string $string = '')
+    {
+        // String was set on initialization.
+        if($string)
+        {
+            // Run all of the set string methods.
+            $this->setString($string);
+            // Sets clean string.
+            $this->setCleanString($string);
+            // Sets score.
+            $this->setScore(0);
+        }
     }
 
     private function getString(): ?string
@@ -34,11 +41,10 @@ class Word
         return $this->string;
     }
 
-    private function setString(string $string): self
+    private function setString(string $string): void
     {
+        // Sets string.
         $this->string = $string;
-
-        return $this;
     }
 
     private function getScore(): ?int
@@ -67,30 +73,35 @@ class Word
 
     public function calculateScore()
     {
-        // Word passes as an actual word.
-        if($this->validateWord())
+        // Word doesn't contain any of the forbidden symbols.
+        if($this->validateCleanString($this->cleanString))
         {
-            // Score a Word based on unique characters.
-            $this->scoreWordBasedOnUniqueCharacters();
-            // Word is a palindrome.
-            if($this->checkPalindrome($this->cleanString))
+            // Word passes as an actual word.
+            if($this->validateWord())
             {
-                // Increase score by 3.
-                $this->increaseScore(3);
-            }
-            // Word is not a palindrome.
-            else
-            {
-                // Word is almost a palindrome.
-                if($this->checkAlmostAPalindrome())
+                // Score a Word based on unique characters.
+                $this->scoreWordBasedOnUniqueCharacters();
+                // Word is a palindrome.
+                if($this->checkPalindrome($this->cleanString))
                 {
-                    // Increase score by 2.
-                    $this->increaseScore(2);
+                    // Increase score by 3.
+                    $this->increaseScore(3);
                 }
+                // Word is not a palindrome.
+                else
+                {
+                    // Word is almost a palindrome.
+                    if($this->checkAlmostAPalindrome())
+                    {
+                        // Increase score by 2.
+                        $this->increaseScore(2);
+                    }
+                }
+                // return score.
+                return $this->getScore();
             }
-            // return score.
-            return $this->getScore();
         }
+
     }
 
     private function validateWord(): bool
@@ -106,6 +117,12 @@ class Word
         }
         // Validation failed.
         return false;
+    }
+
+    private function validateCleanString($string): bool
+    {
+        // Performs regex check on the string.
+        return preg_match($this->wordRegex, $string);
     }
 
     private function scoreWordBasedOnUniqueCharacters(): void
@@ -167,5 +184,21 @@ class Word
                 return false;
             }
         }
+    }
+
+    public function testForForbiddenWords(array $words): bool
+    {
+        // Itterate through all words.
+        foreach($words as $word)
+        {
+            // Word is valid.
+            if($this->validateCleanString($word))
+            {
+                // Test failed.
+                return false;
+            }
+        }
+        // All Words are invalid, test passed.
+        return true;
     }
 }

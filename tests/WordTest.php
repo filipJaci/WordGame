@@ -44,7 +44,7 @@ class WordTest extends TestCase
         $word = new Word($string);
         // Run score method.
         $score = $word->calculateScore();
-        // Score is 7, 4 for the unique letters and 3 for being a palindrome.
+        // Score is 7, 4 for the unique characters and 3 for being a palindrome.
         $this->assertEquals(7, $score);
     }
 
@@ -57,7 +57,7 @@ class WordTest extends TestCase
         $word = new Word($string);
         // Run score method.
         $score = $word->calculateScore();
-        // Score is 6, 4 for the unique letters and 2 for being almost a palindrome.
+        // Score is 6, 4 for the unique characters and 2 for being almost a palindrome.
         $this->assertEquals(6, $score);
     }
 
@@ -71,7 +71,7 @@ class WordTest extends TestCase
         // Run score method.
         $score = $word->calculateScore();
         // Word got validated properly even though it's in mixed case.
-        // Score is 6, 4 for the unique letters and 2 for being almost a palindrome.
+        // Score is 6, 4 for the unique characters and 2 for being almost a palindrome.
         $this->assertEquals(6, $score);
     }
 
@@ -85,7 +85,89 @@ class WordTest extends TestCase
         // Run score method.
         $score = $word->calculateScore();
         // Word got validated properly even though it had whitespaces.
-        // Score is 6, 4 for the unique letters and 2 for being almost a palindrome.
+        // Score is 6, 4 for the unique characters and 2 for being almost a palindrome.
         $this->assertEquals(6, $score);
+    }
+
+    /** @test */
+    public function words_can_contain_the_ampersand_symbol()
+    {
+        // Set a Word with an ampersand.
+        $string = 'AT&T';
+        // Create a new Word object.
+        $word = new Word($string);
+        // Run score method.
+        $score = $word->calculateScore();
+        // Word got validated properly even though it had whitespaces.
+        // Score is 5, 3 for the unique characters and 2 for being almost a palindrome.
+        $this->assertEquals(5, $score);
+    }
+
+    /** @test */
+    public function words_can_contain_numbers()
+    {
+        // Set a Word with an number.
+        $string = '1st';
+        // Create a new Word object.
+        $word = new Word($string);
+        // Run score method.
+        $score = $word->calculateScore();
+        // Word got validated properly even though it had whitespaces.
+        // Score is 3, for the 3 unique characters.
+        $this->assertEquals(3, $score);
+    }
+
+    /** @test */
+    public function words_can_contain_dashes()
+    {
+        // Set a Word with a dash.
+        $string = 'hee-hee';
+        // Create a new Word object.
+        $word = new Word($string);
+        // Run score method.
+        $score = $word->calculateScore();
+        // Word got validated properly even though it had whitespaces.
+        // Score is 3, for the 3 unique characters.
+        $this->assertEquals(3, $score);
+    }
+
+    /** @test */
+    public function words_can_contain_exclamations()
+    {
+        // Set a Word with a dash.
+        $string = 'hee-hee!';
+        // Create a new Word object.
+        $word = new Word($string);
+        // Run score method.
+        $score = $word->calculateScore();
+        // Word got validated properly even though it had whitespaces.
+        // Score is 4, for the 4 unique characters.
+        $this->assertEquals(4, $score);
+    }
+
+    /** @test */
+    public function words_can_not_contain_question_marks()
+    {
+        // Set array of Words with forbidden symbols.
+        $word = 'Hello?';
+        // Create a new Word object.
+        $word = new Word($word);
+        // Run score method.
+        $score = $word->calculateScore();
+        // Score is 0, since validation didn't pass.
+        $this->assertEquals(0, $score);
+    }
+
+    /** @test */
+    public function words_can_not_contain_forbidden_symbols()
+    {
+        // Set array of Words with forbidden symbols.
+        $array = ['a?', 'hello=', '%world', '/122nd', '\\ninja'];
+        // Create a new Word object.
+        $word = new Word();
+        // Test array for forbidden words.
+        $validate = $word->testForForbiddenWords($array);
+        // None of the Words passed.
+        $this->assertTrue($validate);
     }
 }
