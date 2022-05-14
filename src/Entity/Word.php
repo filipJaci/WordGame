@@ -9,20 +9,16 @@ use Doctrine\ORM\Mapping as ORM;
 class Word
 {
 
+    // PROPERTIES
     // Original string that was passed.
     #[ORM\Column(type: 'string', length: 255)]
     private $string;
-
     // Score.
     #[ORM\Column(type: 'integer')]
     private $score;
-
-    // String used for further validation.
-    private string $cleanString;
-
     // Regex used for the clean string validation.
-    private string $wordRegex = '/^[a-zA-Z0-9!&-]*$/';
-
+    private static string $wordRegex = '/^[a-zA-Z0-9!&-]*$/';
+    // Points system for every scenario.
     private static array $scoreSystem = [
         // Score per unique character.
         'unique' => 1,
@@ -31,104 +27,98 @@ class Word
         // Bonus for the Word being almost an palindrome.
         'almost-palindrome' => 2
     ];
-
     // Stores more precise API responses.
     private array $messages = [];
-
     // Stores less precise API responses.
     private array $scenarios = [];
 
-    public function __construct(string $string = '')
-    {
-        // String was set on initialization.
-        if($string)
-        {
-            // Run all of the set string methods.
-            $this->setString($string);
-            // Sets clean string.
-            $this->setCleanString($string);
-            // Sets score.
-            $this->setScore(0);
-            // Run the calculate score method.
-            $this->calculateScore();
-        }
-    }
-
-    private function getString(): ?string
-    {
-        // Gets string.
-        return $this->string;
-    }
-
-    private function setString(string $string): void
-    {
-        // Sets string.
-        $this->string = $string;
-    }
-
+    // GETERS AND SETERS
     public function getScore(): ?int
     {
         // Gets score.
         return $this->score;
     }
-
+    private function setString(string $string): void
+    {
+        // Sets string.
+        $this->string = $string;
+    }
+    private function getString(): ?string
+    {
+        // Gets string.
+        return $this->string;
+    }
     private function setScore(int $score): void
     {
         // Sets score.
         $this->score = $score;
     }
-
-    private function setCleanString(string $string): void
-    {
-        // Removes whitespaces and converts string to lowercase.
-        $this->cleanString = trim(strtolower($string));
-    }
-
-    private function increaseScore(int $newPoints)
-    {
-        // Add new points to the exsisting score.
-        $this->score+=$newPoints;
-    }
-
     private function getPoints(string $scenario): int
     {
         return self::$scoreSystem[$scenario];
     }
-
-    private function addScenario(string $scenario, int $points): void
+    protected function setScenario(string $scenario, int $points): void
     {
         // Add to the scenario array.
-        $this->scenarios+=[$scenario => $points];
+        $this->scenarios[$scenario] = $points;
     }
-
-    public function getScenarios(): array
+    public function getScenario(): array
     {
         return $this->scenarios;
     }
-
-    private function addUniqueCharactersMessage(int $points): void
+    private function setUniqueCharactersMessage(int $points): void
     {
-        $this->messages['unique'] = $points . ', based on unique characters.';
+        // Message type.
+        $type = 'unique';
+        // Message body.
+        $message = $points . ', based on unique characters.';
+        // Set message.
+        $this->setMessage($type, $message);
     }
 
-    private function addPalindromeMessage(int $points): void
+    private function setPalindromeMessage(int $points): void
     {
-        $this->messages['palindrome'] = $points . ', based on the word being a palendrome.';
+        // Message type.
+        $type = 'palindrome';
+        // Message body.
+        $message = $points . ', based on the word being a palendrome.';
+        // Set message.
+        $this->setMessage($type, $message);
     }
 
-    private function addAlmostAPalindromeMessage(int $points): void
+    private function setAlmostAPalindromeMessage(int $points): void
     {
-        $this->messages['almost-palindrome'] = $points . ', based on the word being almost a palendrome.';
+        // Message type.
+        $type = 'almost-palindrome';
+        // Message body.
+        $message = $points . ', based on the word being almost a palendrome.';
+        // Set message.
+        $this->setMessage($type, $message);
+
     }
 
-    private function addTotalScoreMessage(int $points): void
+    private function setTotalScoreMessage(int $points): void
     {
-        $this->messages['total'] = 'Congratulations, you\'ve scored ' . $points . ' points, based on:';
+        // Message type.
+        $type = 'total';
+        // Message body.
+        $message = 'Congratulations, you\'ve scored ' . $points . ' points, based on:';
+        // Set message.
+        $this->setMessage($type, $message);
     }
 
-    private function addFailedCleanStringValidation(string $character): void
+    private function setFailedCleanStringValidation(string $character): void
     {
-        $this->messages['failed.string'] = 'There was an error, string contains forbidden character: ' . $character;
+        // Message type.
+        $type = 'failed.word.format';
+        // Message body.
+        $message = 'There was an error, string contains forbidden character: ' . $character;
+        // Set message.
+        $this->setMessage($type, $message);
+    }
+    protected function setMessage(string $type, string $message): void
+    {
+        $this->messages[$type] = $message;
     }
 
     public function getMessages(): array
@@ -136,127 +126,58 @@ class Word
         return $this->messages;
     }
 
-    private function calculateScore()
+    // PUBLIC STATIC METHODS
+    public static function testArrayForForbiddenCharacters(array $words): array
     {
-        // Word doesn't contain any of the forbidden symbols.
-        if($this->validateCleanString($this->cleanString))
+        // Set word regex variable.
+        $wordRegex = self::$wordRegex;
+        // Determines if the validation passed.
+        $resultTest = [
+            'wordsThatPassed' => [],
+            'wordsThatFailed' => []
+        ];
+        // Itterate through all words.
+        foreach($words as $word)
         {
-            // Word passes as an actual word.
-            if($this->validateWord())
+            // Removes whitespaces and converts string to lowercase.
+            $cleanString = trim(strtolower($word));
+            // Performs regex check on the clean string.
+            $passed = preg_match($wordRegex, $cleanString);
+            // Clean string validation didn't pass.
+            if(! $passed)
             {
-                // Score a Word based on unique characters.
-                $this->scoreWordBasedOnUniqueCharacters();
-                // Word is a palindrome.
-                if($this->checkPalindrome($this->cleanString))
-                {
-                    // Increase score for being a palindrome.
-                    $this->increaseScore($this->getPoints('palindrome'));
-                    // Add scenario.
-                    $this->addScenario('palindrome', $this->getPoints('palindrome'));
-                    // Add message.
-                    $this->addPalindromeMessage($this->getPoints('palindrome'));
-                }
-                // Word is not a palindrome.
-                else
-                {
-                    // Word is almost a palindrome.
-                    if($this->checkAlmostAPalindrome())
-                    {
-                        // Increase score for being almost a palindrome.
-                        $this->increaseScore($this->getPoints('almost-palindrome'));
-                        // Add scenario.
-                        $this->addScenario('almost-palindrome', $this->getPoints('almost-palindrome'));
-                        // Add message.
-                        $this->addAlmostAPalindromeMessage($this->getPoints('almost-palindrome'));
-                    }
-                }
-                // Add total score message.
-                $this->addTotalScoreMessage($this->score);
-                // Return object.
-                return $this;
+                // Word contains forbidden characters.
+                $resultTest['wordsThatFailed'][]=$word;
+            }
+            else{
+                // Word doesn't contain forbidden characters.
+                $resultTest['wordsThatPassed'][]=$word;
             }
         }
-
+        // Return result.
+        return $resultTest;
     }
 
-    private function validateWord(): bool
+    // PUBLIC METHODS
+    public function __construct(string $string)
     {
-        // Validate Word through API.
-        $validationResult = true;
-        // API validation passed.
-        if($validationResult)
-        {
-            // Validation passed.
-            return true;
-
-        }
-        // Validation failed.
-        return false;
+        // Run the set up method.
+        $this->setUpWord($string);
     }
-
-    private function validateCleanString(string $string): bool
+    public function checkAlmostAPalindrome(string $string): bool
     {
-        // Performs regex check on the string.
-        $passed = preg_match($this->wordRegex, $string);
-        // Clean string validation didn't pass.
-        if(! $passed)
-        {
-            // Add a scenario.
-            $this->addScenario('failed.string', 0);
-            // Get forbidden characters.
-            $forbiddenCharacters = preg_replace('/[a-zA-Z0-9!&-]/', '', $string);
-            // Add message.
-            $this->addFailedCleanStringValidation($forbiddenCharacters);
-            // Clean string validation didn't pass.
-            return false;
-        }
-        // Clean string validation passed.
-        return true;
-    }
-
-    private function scoreWordBasedOnUniqueCharacters(): void
-    {
-        // Make an array out of the existing string.
-        $stringArray = str_split($this->cleanString);
-        // Filter array in order to get rid of duplicate members, then count the remaning members.
-        $uniqueCharacters = count(array_unique($stringArray));
-        // Score to be added, certain number of points for each character.
-        $newPoints = $uniqueCharacters * $this->getPoints('unique');
-        // Increase the score.
-        $this->increaseScore($newPoints);
-        // Add scenario.
-        $this->addScenario('unique', $newPoints);
-        // Add message.
-        $this->addUniqueCharactersMessage($newPoints);
-    }
-
-    private function checkPalindrome(string $string): bool
-    {
+        // Removes whitespaces and converts string to lowercase.
+        $cleanString = $this->makeCleanString($string);
         // Reverse the string.
-        $reverseString = strrev($string);
-        // String matches the reversed string.
-        if($reverseString === $string)
-        {
-            // Word is an palindrome.
-            return true;
-        }
-        // Arrays don't match.
-        // Word isn't a palindrome.
-        return false;
-    }
-
-    public function checkAlmostAPalindrome(): bool
-    {
-        // Reverse the string.
-        $reverseString = strrev($this->cleanString);
+        $reverseString = strrev($cleanString);
         // Itterate through the string.
-        for($i = 0; $i < strlen($this->cleanString); $i++)
+        for($i = 0; $i < strlen($cleanString); $i++)
         {
             // Characters between the two strings don't match, at least one of the two causes a problem.
-            if($this->cleanString[$i] !== $reverseString[$i])
+            if($cleanString[$i] !== $reverseString[$i])
             {
                 // Remove problematic character from the first string.
-                $shortenedString = substr_replace($this->cleanString, '', $i, 1);                
+                $shortenedString = substr_replace($cleanString, '', $i, 1);                
                 // Word is now a palindrome.
                 if($this->checkPalindrome($shortenedString))
                 {
@@ -281,19 +202,115 @@ class Word
         }
     }
 
-    public function testForForbiddenWords(array $words): bool
+    // PRTOECTED METHODS
+    protected function setUpWord(string $string): void
     {
-        // Itterate through all words.
-        foreach($words as $word)
+        // Run all of the set string methods.
+        $this->setString($string);
+        // Sets score.
+        $this->setScore(0);
+        // String passes the validation.
+        if($this->validateWord($string))
         {
-            // Word is valid.
-            if($this->validateCleanString($word))
+            // Run the calculate score method.
+            $this->calculateScore($string);
+        }
+
+    }
+    protected function calculateScore($string): void
+    {
+        // Removes whitespaces and converts string to lowercase.
+        $cleanString = $this->makeCleanString($string);
+        // Score a Word based on unique characters.
+        $this->scoreWordBasedOnUniqueCharacters($string);
+        // Word is a palindrome.
+        if($this->checkPalindrome($cleanString))
+        {
+            // Increase score for being a palindrome.
+            $this->increaseScore($this->getPoints('palindrome'));
+            // Add scenario.
+            $this->setScenario('palindrome', $this->getPoints('palindrome'));
+            // Add message.
+            $this->setPalindromeMessage($this->getPoints('palindrome'));
+        }
+        // Word is not a palindrome.
+        else
+        {
+            // Word is almost a palindrome.
+            if($this->checkAlmostAPalindrome($string))
             {
-                // Test failed.
-                return false;
+                // Increase score for being almost a palindrome.
+                $this->increaseScore($this->getPoints('almost-palindrome'));
+                // Add scenario.
+                $this->setScenario('almost-palindrome', $this->getPoints('almost-palindrome'));
+                // Add message.
+                $this->setAlmostAPalindromeMessage($this->getPoints('almost-palindrome'));
             }
         }
-        // All Words are invalid, test passed.
+        // Add total score message.
+        $this->setTotalScoreMessage($this->score);
+    }
+    protected function validateWord(string $string): bool
+    {
+        // Removes whitespaces and converts string to lowercase.
+        $cleanString = $this->makeCleanString($string);
+        // Performs regex check on the clean string.
+        $passed = preg_match(self::$wordRegex, $cleanString);
+        // Clean string validation didn't pass.
+        if(! $passed)
+        {
+            // Add a scenario.
+            $this->setScenario('failed.word.format', 0);
+            // Get forbidden characters.
+            $forbiddenCharacters = preg_replace('/[a-zA-Z0-9!&-]/', '', $cleanString);
+            // Add message.
+            $this->setFailedCleanStringValidation($forbiddenCharacters);
+            // Clean string validation didn't pass.
+            return false;
+        }
+        // Clean string validation passed.
         return true;
+    }
+
+    // PRIVATE METHODS.
+    private function makeCleanString(string $string): string
+    {
+        return trim(strtolower($string));
+    }
+    private function increaseScore(int $newPoints)
+    {
+        // Add new points to the exsisting score.
+        $this->score+=$newPoints;
+    }
+    private function scoreWordBasedOnUniqueCharacters(string $string): void
+    {
+        // Removes whitespaces and converts string to lowercase.
+        $cleanString = $this->makeCleanString($string);
+        // Make an array out of the existing string.
+        $stringArray = str_split($cleanString);
+        // Filter array in order to get rid of duplicate members, then count the remaning members.
+        $uniqueCharacters = count(array_unique($stringArray));
+        // Score to be added, certain number of points for each character.
+        $newPoints = $uniqueCharacters * $this->getPoints('unique');
+        // Increase the score.
+        $this->increaseScore($newPoints);
+        // Add scenario.
+        $this->setScenario('unique', $newPoints);
+        // Add message.
+        $this->setUniqueCharactersMessage($newPoints);
+    }
+    private function checkPalindrome(string $string): bool
+    {
+        // Reverse the string.
+        $reverseString = strrev($string);
+        // String matches the reversed string.
+        if($reverseString === $string)
+        {
+            // Word is an palindrome.
+            return true;
+        }
+        // Arrays don't match.
+        // Word isn't a palindrome.
+        return false;
     }
 }

@@ -20,7 +20,7 @@ class WordTest extends TestCase
         // Score is 5.
         $this->assertEquals(5, $score);
         // Get scenarios.
-        $scenarios = $word->getScenarios();
+        $scenarios = $word->getScenario();
         // There is 1 scenario that got triggered.
         $this->assertCount(1, $scenarios);
         // Scenario unique got triggered.
@@ -39,7 +39,7 @@ class WordTest extends TestCase
         // Score is 4.
         $this->assertEquals(4, $score);
         // Get scenarios.
-        $scenarios = $word->getScenarios();
+        $scenarios = $word->getScenario();
         // There is 1 scenario that got triggered.
         $this->assertCount(1, $scenarios);
         // Scenario unique got triggered.
@@ -58,7 +58,8 @@ class WordTest extends TestCase
         // Score is 7, 4 for the unique characters and 3 for being a palindrome.
         $this->assertEquals(7, $score);
         // Get scenarios.
-        $scenarios = $word->getScenarios();
+        $scenarios = $word->getScenario();
+
         // There are 2 scenarios that got triggered.
         $this->assertCount(2, $scenarios);
         // Scenario unique got triggered.
@@ -83,7 +84,7 @@ class WordTest extends TestCase
         // Score is 6, 4 for the unique characters and 2 for being almost a palindrome.
         $this->assertEquals(6, $score);
         // Get scenarios.
-        $scenarios = $word->getScenarios();
+        $scenarios = $word->getScenario();
         // There are 2 scenarios that got triggered.
         $this->assertCount(2, $scenarios);
         // Scenario unique got triggered.
@@ -109,7 +110,7 @@ class WordTest extends TestCase
         // Score is 6, 4 for the unique characters and 2 for being almost a palindrome.
         $this->assertEquals(6, $score);
         // Get scenarios.
-        $scenarios = $word->getScenarios();
+        $scenarios = $word->getScenario();
         // There are 2 scenarios that got triggered.
         $this->assertCount(2, $scenarios);
         // Scenario unique got triggered.
@@ -135,7 +136,7 @@ class WordTest extends TestCase
         // Score is 6, 4 for the unique characters and 2 for being almost a palindrome.
         $this->assertEquals(6, $score);
         // Get scenarios.
-        $scenarios = $word->getScenarios();
+        $scenarios = $word->getScenario();
         // There are 2 scenarios that got triggered.
         $this->assertCount(2, $scenarios);
         // Scenario unique got triggered.
@@ -161,7 +162,7 @@ class WordTest extends TestCase
         // Score is 5, 3 for the unique characters and 2 for being almost a palindrome.
         $this->assertEquals(5, $score);
         // Get scenarios.
-        $scenarios = $word->getScenarios();
+        $scenarios = $word->getScenario();
         // There are 2 scenarios that got triggered.
         $this->assertCount(2, $scenarios);
         // Scenario unique got triggered.
@@ -187,7 +188,7 @@ class WordTest extends TestCase
         // Score is 3, for the 3 unique characters.
         $this->assertEquals(3, $score);
         // Get scenarios.
-        $scenarios = $word->getScenarios();
+        $scenarios = $word->getScenario();
         // There was 1 scenario that got triggered.
         $this->assertCount(1, $scenarios);
         // Scenario unique got triggered.
@@ -207,7 +208,7 @@ class WordTest extends TestCase
         // Score is 3, for the 3 unique characters.
         $this->assertEquals(3, $score);
         // Get scenarios.
-        $scenarios = $word->getScenarios();
+        $scenarios = $word->getScenario();
         // There was 1 scenario that got triggered.
         $this->assertCount(1, $scenarios);
         // Scenario unique got triggered.
@@ -227,7 +228,7 @@ class WordTest extends TestCase
         // Score is 4, for the 4 unique characters.
         $this->assertEquals(4, $score);
         // Get scenarios.
-        $scenarios = $word->getScenarios();
+        $scenarios = $word->getScenario();
         // There was 1 scenario that got triggered.
         $this->assertCount(1, $scenarios);
         // Scenario unique got triggered.
@@ -246,24 +247,26 @@ class WordTest extends TestCase
         // Score is 0, since validation didn't pass.
         $this->assertEquals(0, $score);
         // Get scenarios.
-        $scenarios = $word->getScenarios();
+        $scenarios = $word->getScenario();
         // There was 1 scenario that got triggered.
         $this->assertCount(1, $scenarios);
-        // Scenario failed.string got triggered.
-        $this->assertTrue(array_key_exists('failed.string', $scenarios));
+        // Scenario failed.word.format got triggered.
+        $this->assertTrue(array_key_exists('failed.word.format', $scenarios));
     }
 
     /** @test */
     public function words_can_not_contain_forbidden_symbols()
     {
-        // Set array of Words with forbidden symbols.
-        $array = ['a?', 'hello=', '%world', '/122nd', '\\ninja'];
-        // Create a new Word object.
-        $word = new Word();
-        // Test array for forbidden words.
-        $validate = $word->testForForbiddenWords($array);
-        // None of the Words passed.
-        $this->assertTrue($validate);
+        // Set array of Words with forbidden symbols and one valid word.
+        $array = ['a?', 'hello=', '%world', 'exclamation', '/122nd', '\\ninja'];
+        // Total number of items in the array.
+        $arrayLength = count($array);
+        // Test array for forbidden characters.
+        $validationResult = Word::testArrayForForbiddenCharacters($array);
+        // Get number of Words that failed.
+        $numberOfWordsThatFailed = count($validationResult['wordsThatFailed']);
+        // All of the Words failed validation, except for one word.
+        $this->assertEquals($arrayLength - 1, $numberOfWordsThatFailed);
     }
 
     /** @test */
@@ -312,6 +315,6 @@ class WordTest extends TestCase
         // There is 1 message.
         $this->assertCount(1, $messages);
         // There is the message about score based on the word being a palendrome.
-        $this->assertEquals('There was an error, string contains forbidden character: ?', $messages['failed.string']);
+        $this->assertEquals('There was an error, string contains forbidden character: ?', $messages['failed.word.format']);
     }
 }
