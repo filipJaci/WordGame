@@ -11,10 +11,16 @@ import './styles/app.css';
 // // start the Stimulus application
 // import './bootstrap';
 
+// axios
+
+
+// Vue
 import Vue from 'vue';
 import App from './components/App';
 
-new Vue({
+window.axios = require('axios');
+
+const app = new Vue({
     el: '#app',
-    render: h => h(App)
+    render: h => h(App),
 });

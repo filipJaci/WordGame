@@ -11,10 +11,10 @@ class WordResourceTest extends WebTestCase
     {
         // Get response data.
         $responseData = json_decode($client->getResponse()->getContent());
-        // There is the scenario key.
-        $this->assertObjectHasAttribute('scenario', $responseData);
+        // There is the messages key.
+        $this->assertObjectHasAttribute('messages', $responseData);
         // Returned scenario is the expected one.
-        $this->assertObjectHasAttribute($scenario, $responseData->scenario);
+        $this->assertObjectHasAttribute($scenario, $responseData->messages);
     }
 
     private function runTheWordControllerRequest(string $word, int $statusCode, array $scenarios): void
@@ -29,7 +29,7 @@ class WordResourceTest extends WebTestCase
                 'word' => $word
             ]
         );
-        // Status code is 400 - Bad request.
+        // Check status code.
         $this->assertResponseStatusCodeSame($statusCode);
         // For each scenario.
         foreach($scenarios as $scenario)

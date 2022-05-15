@@ -17,13 +17,13 @@ class WordController extends AbstractController
         // Get Word parameter from the request.
         // Instanciate a new WordAPI object with it.
         $word = new WordAPI($request->request->get('word'));
-        // Get scenario.
-        $scenario = $word->getScenario();
+        // Get messages.
+        $messages = $word->getMessages();
         // Get http code.
         $code = $word->getHttpStatus();
         // Return response.
         return $this->json([
-            'scenario' => $scenario
+            'messages' => $messages
         ], $code);
     }
 }

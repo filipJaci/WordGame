@@ -29,11 +29,14 @@ class Word
     ];
     // Stores more precise API responses.
     private array $messages = [];
-    // Stores less precise API responses.
-    private array $scenarios = [];
 
     // GETERS AND SETERS
-    public function getScore(): ?int
+    private function setScore(int $score): void
+    {
+        // Sets score.
+        $this->score = $score;
+    }
+    private function getScore(): ?int
     {
         // Gets score.
         return $this->score;
@@ -48,23 +51,10 @@ class Word
         // Gets string.
         return $this->string;
     }
-    private function setScore(int $score): void
-    {
-        // Sets score.
-        $this->score = $score;
-    }
+    // Messages
     private function getPoints(string $scenario): int
     {
         return self::$scoreSystem[$scenario];
-    }
-    protected function setScenario(string $scenario, int $points): void
-    {
-        // Add to the scenario array.
-        $this->scenarios[$scenario] = $points;
-    }
-    public function getScenario(): array
-    {
-        return $this->scenarios;
     }
     private function setUniqueCharactersMessage(int $points): void
     {
@@ -73,7 +63,7 @@ class Word
         // Message body.
         $message = $points . ', based on unique characters.';
         // Set message.
-        $this->setMessage($type, $message);
+        $this->setMessage($type, $message, $points);
     }
 
     private function setPalindromeMessage(int $points): void
@@ -81,9 +71,9 @@ class Word
         // Message type.
         $type = 'palindrome';
         // Message body.
-        $message = $points . ', based on the word being a palendrome.';
+        $message = $points . ', based on the word being a palindrome.';
         // Set message.
-        $this->setMessage($type, $message);
+        $this->setMessage($type, $message, $points);
     }
 
     private function setAlmostAPalindromeMessage(int $points): void
@@ -91,9 +81,9 @@ class Word
         // Message type.
         $type = 'almost-palindrome';
         // Message body.
-        $message = $points . ', based on the word being almost a palendrome.';
+        $message = $points . ', based on the word being almost a palindrome.';
         // Set message.
-        $this->setMessage($type, $message);
+        $this->setMessage($type, $message, $points);
 
     }
 
@@ -104,7 +94,7 @@ class Word
         // Message body.
         $message = 'Congratulations, you\'ve scored ' . $points . ' points, based on:';
         // Set message.
-        $this->setMessage($type, $message);
+        $this->setMessage($type, $message, $points);
     }
 
     private function setFailedCleanStringValidation(string $character): void
@@ -114,11 +104,12 @@ class Word
         // Message body.
         $message = 'There was an error, string contains forbidden character: ' . $character;
         // Set message.
-        $this->setMessage($type, $message);
+        $this->setMessage($type, $message, 0);
     }
-    protected function setMessage(string $type, string $message): void
+    protected function setMessage(string $type, string $message, int $points): void
     {
-        $this->messages[$type] = $message;
+        $this->messages[$type]['message'] = $message;
+        $this->messages[$type]['points'] = $points;
     }
 
     public function getMessages(): array
@@ -217,7 +208,7 @@ class Word
         }
 
     }
-    protected function calculateScore($string): void
+    protected function calculateScore(string $string): void
     {
         // Removes whitespaces and converts string to lowercase.
         $cleanString = $this->makeCleanString($string);
@@ -228,8 +219,6 @@ class Word
         {
             // Increase score for being a palindrome.
             $this->increaseScore($this->getPoints('palindrome'));
-            // Add scenario.
-            $this->setScenario('palindrome', $this->getPoints('palindrome'));
             // Add message.
             $this->setPalindromeMessage($this->getPoints('palindrome'));
         }
@@ -241,14 +230,12 @@ class Word
             {
                 // Increase score for being almost a palindrome.
                 $this->increaseScore($this->getPoints('almost-palindrome'));
-                // Add scenario.
-                $this->setScenario('almost-palindrome', $this->getPoints('almost-palindrome'));
                 // Add message.
                 $this->setAlmostAPalindromeMessage($this->getPoints('almost-palindrome'));
             }
         }
-        // Add total score message.
-        $this->setTotalScoreMessage($this->score);
+        // Add message.
+        $this->setTotalScoreMessage($this->getScore());
     }
     protected function validateWord(string $string): bool
     {
@@ -259,8 +246,6 @@ class Word
         // Clean string validation didn't pass.
         if(! $passed)
         {
-            // Add a scenario.
-            $this->setScenario('failed.word.format', 0);
             // Get forbidden characters.
             $forbiddenCharacters = preg_replace('/[a-zA-Z0-9!&-]/', '', $cleanString);
             // Add message.
@@ -277,7 +262,7 @@ class Word
     {
         return trim(strtolower($string));
     }
-    private function increaseScore(int $newPoints)
+    private function increaseScore(int $newPoints): void
     {
         // Add new points to the exsisting score.
         $this->score+=$newPoints;
@@ -294,8 +279,6 @@ class Word
         $newPoints = $uniqueCharacters * $this->getPoints('unique');
         // Increase the score.
         $this->increaseScore($newPoints);
-        // Add scenario.
-        $this->setScenario('unique', $newPoints);
         // Add message.
         $this->setUniqueCharactersMessage($newPoints);
     }

@@ -56,6 +56,7 @@ class WordAPI extends Word
     {
         // Make a API request to validate word example.
         $response = self::makeAPIRequest('example');
+        dd(json_decode($response->getContent()));
         // API responded with status 200.
         if($response->getStatusCode() === 200)
         {
@@ -75,8 +76,6 @@ class WordAPI extends Word
             $this->setHttpStatus(400);
             // Set invalid attribute message.
             $this->setInvalidAttributeFormatMessage();
-            // Set invalid attribute setatus.
-            $this->setInvalidAttributeFormatStatus();
             // Validation failed.
             return false;
         }
@@ -100,15 +99,8 @@ class WordAPI extends Word
     private function setInvalidAttributeFormatMessage(): void
     {
         // Set appropriate message.
-        $this->setMessage('failed.attribute', 'Invalid attribute, please send a string instead');
+        $this->setMessage('failed.attribute', 'Invalid attribute, please send a string instead', 0);
     }
-
-    private function setInvalidAttributeFormatStatus(): void
-    {
-        // Set appropriate scenario.
-        $this->setScenario('failed.attribute', 0);
-    }
-
     private function setHttpStatus(int $httpStatus): void
     {
         // Return http status.
@@ -137,8 +129,7 @@ class WordAPI extends Word
                 if(! $contentObject->valid)
                 {
                     // Set appropriate responses.
-                    $this->setMessage('failed.api.validation', 'Word isn\'t a proper English word.');
-                    $this->setScenario('failed.api.validation', 0);
+                    $this->setMessage('failed.api.validation', 'Word isn\'t a proper English word.', 0);
                     $this->setHttpStatus(400);
                     // Validation failed.
                     return false;
@@ -149,8 +140,7 @@ class WordAPI extends Word
             else
             {
                 // Set appropriate responses.
-                $this->setMessage('failed.api.error', 'There was an server error, please try again later.');
-                $this->setScenario('failed.api.error', 0);
+                $this->setMessage('failed.api.error', 'There was an server error, please try again later.', 0);
                 $this->setHttpStatus(400);
             }
         }
