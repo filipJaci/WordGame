@@ -11,6 +11,7 @@ use App\Entity\Word;
 #[ORM\Entity(repositoryClass: WordAPIRepository::class)]
 class WordAPI extends Word
 {
+    // PROPERTIES
     // API route.
     private static string $apiPath = 'https://dictionary-by-api-ninjas.p.rapidapi.com/v1/dictionary';
     // API headers.
@@ -25,12 +26,7 @@ class WordAPI extends Word
     // Used when generating responses.
     private int $httpStatus = 200;
 
-    private function setClient()
-    {
-        // Setup http client object.
-        $this->client = HttpClient::create();
-    }
-
+    // CONSTRUCTOR
     public function __construct($attribute)
     {
         // Validate that attribute provided in the request.
@@ -54,6 +50,19 @@ class WordAPI extends Word
         }
     }
 
+    // GETERS AND SETERS
+    private function setHttpStatus(int $httpStatus): void
+    {
+        // Return http status.
+        $this->httpStatus = $httpStatus;    
+    }
+    public function getHttpStatus(): int
+    {
+        // Return http status.
+        return $this->httpStatus;    
+    }
+
+    // PUBLIC STATIC METHODS
     public static function testConnection(): bool
     {
         // Make a API request to validate word example.
@@ -69,6 +78,12 @@ class WordAPI extends Word
         return false;
     }
 
+    // PRIVATE METHODS
+    private function setClient()
+    {
+        // Setup http client object.
+        $this->client = HttpClient::create();
+    }
     private function attributeTest($attribute): bool
     {
         // Attribute is not a string.
@@ -85,7 +100,6 @@ class WordAPI extends Word
         // Validation passed.
         return true;
     }
-
     private function validateAttributeType($attribute): bool
     {
         // Attribute is an object or array.
@@ -97,24 +111,11 @@ class WordAPI extends Word
         // Tests attribute for being a string.
         return is_string($attribute);
     }
-
     private function setInvalidAttributeFormatMessage(): void
     {
         // Set appropriate message.
         $this->setMessage('failed.attribute', 'Invalid attribute, please send a string instead', 0);
     }
-    private function setHttpStatus(int $httpStatus): void
-    {
-        // Return http status.
-        $this->httpStatus = $httpStatus;    
-    }
-
-    public function getHttpStatus(): int
-    {
-        // Return http status.
-        return $this->httpStatus;    
-    }
-
     private function validateThroughAPI(string $word): bool
     {
         // Make the API request.
@@ -131,7 +132,7 @@ class WordAPI extends Word
                 if(! $contentObject->valid)
                 {
                     // Set appropriate responses.
-                    $this->setMessage('failed.api.validation', 'Word isn\'t a proper English word.', 0);
+                    $this->setMessage('failed.api.validation', 'Word: '. $word . ' isn\'t a proper English word.', 0);
                     $this->setHttpStatus(400);
                     // Validation failed.
                     return false;
@@ -150,7 +151,6 @@ class WordAPI extends Word
         return false;
 
     }
-
     private static function makeAPIRequest(string $word): object
     {
         // Setup http client object.

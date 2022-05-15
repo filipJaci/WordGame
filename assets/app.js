@@ -11,16 +11,17 @@ import './styles/app.css';
 // // start the Stimulus application
 // import './bootstrap';
 
-// axios
-
-
 // Vue
 import Vue from 'vue';
 import App from './components/App';
 
+// axios
 window.axios = require('axios');
+
+import vuetify from './plugins/vuetify' // path to vuetify export
 
 const app = new Vue({
     el: '#app',
     render: h => h(App),
+    vuetify
 });
