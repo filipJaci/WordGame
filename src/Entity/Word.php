@@ -30,6 +30,13 @@ class Word
     // Stores more precise API responses.
     private array $messages = [];
 
+    // CONSTRUCTOR
+    public function __construct(string $string)
+    {
+        // Run the set up method.
+        $this->setUpWord($string);
+    }
+
     // GETERS AND SETERS
     private function setScore(int $score): void
     {
@@ -41,7 +48,7 @@ class Word
         // Gets score.
         return $this->score;
     }
-    private function setString(string $string): void
+    protected function setString(string $string): void
     {
         // Sets string.
         $this->string = $string;
@@ -61,7 +68,7 @@ class Word
         // Message type.
         $type = 'unique';
         // Message body.
-        $message = $points . ', based on unique characters.';
+        $message = 'You\'ve scored ' . $points . ', based on unique characters.';
         // Set message.
         $this->setMessage($type, $message, $points);
     }
@@ -71,7 +78,7 @@ class Word
         // Message type.
         $type = 'palindrome';
         // Message body.
-        $message = $points . ', based on the word being a palindrome.';
+        $message = 'You\'ve scored ' . $points . ', based on the word being a palindrome.';
         // Set message.
         $this->setMessage($type, $message, $points);
     }
@@ -81,7 +88,7 @@ class Word
         // Message type.
         $type = 'almost-palindrome';
         // Message body.
-        $message = $points . ', based on the word being almost a palindrome.';
+        $message = 'You\'ve scored ' . $points . ', based on the word being almost a palindrome.';
         // Set message.
         $this->setMessage($type, $message, $points);
 
@@ -92,7 +99,7 @@ class Word
         // Message type.
         $type = 'total';
         // Message body.
-        $message = 'Congratulations, you\'ve scored ' . $points . ' points, based on:';
+        $message = 'Congratulations, your total score for the word: "' . $this->getString() . '" is ' . $points . ' points.';
         // Set message.
         $this->setMessage($type, $message, $points);
     }
@@ -150,11 +157,6 @@ class Word
     }
 
     // PUBLIC METHODS
-    public function __construct(string $string)
-    {
-        // Run the set up method.
-        $this->setUpWord($string);
-    }
     public function checkAlmostAPalindrome(string $string): bool
     {
         // Removes whitespaces and converts string to lowercase.

@@ -17,7 +17,14 @@
         <button @click="hanldeOnClick">Validate word!</button>
 
         <!-- Results -->
-        <p>{{ results }}</p>
+        <ul>
+            <li
+                v-for="(message, key) in apiMessages"
+                :key="key"
+            >
+                {{ message.message }}
+            </li>
+        </ul>
     </div>
 </template>
 
@@ -31,6 +38,8 @@
                 results: '',
                 // Button is disabled.
                 buttonDisabled: false,
+                // Used for displaying API responses.
+                apiMessages: '',
             };
         },
         methods: {
@@ -75,11 +84,38 @@
                     }
                 )
                 .then(response => {
-                    console.log(response);
+                    // Handle 2xx response.
+                    this.handleSuccess(response);
                 })
                 .catch(error => {
-                    console.log(error);
+                    // Handle a non 2xx response.
+                    this.handleFaliure(error);
                 })
+            },
+            handleSuccess(response)
+            {
+                // Get response messages.
+                this.apiMessages = response.data.messages;
+                // Write word inside of Console.
+                console.log('Scores for the word: ' + this.word);
+                // Itterate through messages.
+                for (const key in this.apiMessages) {
+                    // Write messages inside of Console.
+                    console.log(key, this.apiMessages[key].points);
+                }
+            },
+            handleFaliure(error)
+            {
+                // Get response messages.
+                this.apiMessages = error.response.data.messages;
+                console.log(this.apiMessages);
+                // Write word inside of Console.
+                console.log('Scores for the word: ' + this.word);
+                // Itterate through messages.
+                for (const key in this.apiMessages) {
+                    // Write messages inside of Console.
+                    console.log(this.apiMessages[key]['message']);
+                }
             }
         },
         mounted() {

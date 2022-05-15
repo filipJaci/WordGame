@@ -45,6 +45,8 @@ class WordAPI extends Word
                 // Attribute passes the API test.
                 if($this->validateThroughAPI($attribute))
                 {
+                    // Set string.
+                    $this->setString($attribute);
                     // Run the calculate score method.
                     $this->calculateScore($attribute);
                 }
